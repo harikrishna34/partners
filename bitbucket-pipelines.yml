@@ -1,0 +1,26 @@
+image: node:16.13.2
+pipelines:
+  default:
+      - step:
+          caches:
+            - node
+          script: # Modify the commands below to build your repository and run the application.
+            - apt-get update && apt-get install -y rsync
+            - ssh-keyscan -H 3.129.25.59 >> ~/.ssh/known_hosts
+            - ssh ubuntu@3.129.25.59 "sudo mkdir -p /var/www/partners"
+            - rsync -r -v -e ssh . ubuntu@3.129.25.59:/var/www/partners --delete-before --exclude '.git' --rsync-path="sudo rsync"
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo apt-get install -y curl'
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -'
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo apt-get install -y nodejs && sudo apt update && sudo apt upgrade -y'
+           # - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo apt update'
+          #- ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo apt upgrade'
+          #  - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo apt install nginx' 
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo npm install -y'
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo npm audit fix --force'
+
+            - ssh ubuntu@3.129.25.59 'sudo npm install -g npm@9.8.1'
+            
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo npm run build'
+            - ssh ubuntu@3.129.25.59 'cd /var/www/partners && sudo npm start'
+
+           # - ssh ubuntu@3.129.25.59 'sudo service nginx restart'
