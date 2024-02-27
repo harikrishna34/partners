@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USERNAME = credentials('harilakki34')
-        DOCKER_HUB_PASSWORD = credentials('harikrishna@1234')
-        DOCKER_HUB_REPO = "harilakki34/vendor-web" // Replace with your Docker Hub repository name
+        dockerImage = ''
+        registry = 'harilakki34/vendor-web'
+        registryCredential = 'docker-hub-credentials'
     }
 
 
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 // Build Docker image
                 script {
-                    docker.build("harilakki34/vendor-web:latest")
+                    dockerImage = docker.build registry
                 }
             }
         }
@@ -28,8 +28,8 @@ pipeline {
             steps {
                 // Push Docker image to Docker Hub or any other registry
                 script {
-                    docker.withRegistry('https://hub.docker.com/', DOCKER_HUB_USERNAME, DOCKER_HUB_PASSWORD) {
-                        docker.image("harilakki34/vendor-web:latest").push()
+                    docker.withRegistry('', registryCredential ) {
+                        dockerImage.push()
                     }
                 }
             }
